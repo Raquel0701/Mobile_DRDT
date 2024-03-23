@@ -42,10 +42,16 @@ import kotlinx.coroutines.delay
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun PersonListObject() {
+
+fun FormTimer(
+        duration:Int,
+        onPause: () -> Unit,
+        onReset:() -> Unit,
+        onComplete: () -> Unit = {}
+    ){
 
     var timeLeft by remember {
-        mutableStateOf(10)
+        mutableStateOf(duration)
     }
 
     var byPause by remember {
@@ -57,7 +63,67 @@ fun PersonListObject() {
             delay(1000L)
             timeLeft--
         }
+        onComplete()
     }
+
+    Text(text = timeLeft.toString(),
+        color= Color.LightGray,
+        fontSize = 20.sp,
+        modifier = Modifier
+            .background(Color.DarkGray)
+            .padding(20.dp)
+    )
+    Button(enabled = timeLeft != 10,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.LightGray,
+            contentColor = Color.Black
+        ),
+        onClick = {
+            byPause = false
+            timeLeft = duration
+            onPause()
+
+        })
+    {
+        Icon(
+            imageVector= Icons.Default.Refresh,
+            contentDescription=null
+        )
+        Spacer(modifier = Modifier
+            . size(16.dp)
+        )
+        Text(text="Restart!")
+
+    }
+
+    Button(
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.LightGray,
+            contentColor = Color.Black
+        ),
+        onClick = {
+            byPause=true
+            onReset()
+        })
+    {
+        Icon(
+            imageVector= Icons.Default.Warning,
+            contentDescription=null
+        )
+        Spacer(modifier = Modifier
+            . size(16.dp)
+        )
+        Text(text="Pause!")
+
+    }
+}
+@Composable
+fun PersonListObject() {
+
+
+var isFormEnabled by remember {
+    mutableStateOf(true)
+}
 
     var name by remember {
         mutableStateOf("")
@@ -86,53 +152,17 @@ fun PersonListObject() {
             modifier = Modifier
                 .background(Color.White)
         )
+        FormTimer(
+            duration = 5,
+            onReset ={
+                isFormEnabled=true
+            },
+            onPause = {
+                isFormEnabled=false
+            }
 
-        Text(text = timeLeft.toString(),
-            color= Color.LightGray,
-            fontSize = 20.sp,
-            modifier = Modifier
-                .background(Color.DarkGray)
-                .padding(20.dp)
         )
-        Button(enabled = timeLeft != 10,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.LightGray,
-                contentColor = Color.Black
-            ),
-            onClick = {
-                timeLeft = 10
-            })
-        {
-            Icon(
-                imageVector= Icons.Default.Refresh,
-                contentDescription=null
-            )
-            Spacer(modifier = Modifier
-                . size(16.dp)
-            )
-            Text(text="Restart!")
 
-        }
-
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.LightGray,
-                contentColor = Color.Black
-            ),
-            onClick = {
-                byPause = true
-            })
-        {
-            Icon(
-                imageVector= Icons.Default.Warning,
-                contentDescription=null
-            )
-            Spacer(modifier = Modifier
-                . size(16.dp)
-            )
-            Text(text="Pause!")
-
-        }
         Row(modifier = Modifier.fillMaxWidth()) {
             TextField(
                 value = name,
