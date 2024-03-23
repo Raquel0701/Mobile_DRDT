@@ -13,13 +13,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,12 +35,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun PersonListObject() {
+
+    var timeLeft by remember {
+        mutableStateOf(10)
+    }
+
+    var byPause by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(key1=timeLeft){
+        while (timeLeft>0 && !byPause){
+            delay(1000L)
+            timeLeft--
+        }
+    }
+
     var name by remember {
         mutableStateOf("")
     }
@@ -46,6 +69,9 @@ fun PersonListObject() {
     var names by remember {
         mutableStateOf(listOf<Person>())
     }
+
+
+
     var context = LocalContext.current
 
     Column(
@@ -61,6 +87,52 @@ fun PersonListObject() {
                 .background(Color.White)
         )
 
+        Text(text = timeLeft.toString(),
+            color= Color.LightGray,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .background(Color.DarkGray)
+                .padding(20.dp)
+        )
+        Button(enabled = timeLeft != 10,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.LightGray,
+                contentColor = Color.Black
+            ),
+            onClick = {
+                timeLeft = 10
+            })
+        {
+            Icon(
+                imageVector= Icons.Default.Refresh,
+                contentDescription=null
+            )
+            Spacer(modifier = Modifier
+                . size(16.dp)
+            )
+            Text(text="Restart!")
+
+        }
+
+        Button(
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.LightGray,
+                contentColor = Color.Black
+            ),
+            onClick = {
+                byPause = true
+            })
+        {
+            Icon(
+                imageVector= Icons.Default.Warning,
+                contentDescription=null
+            )
+            Spacer(modifier = Modifier
+                . size(16.dp)
+            )
+            Text(text="Pause!")
+
+        }
         Row(modifier = Modifier.fillMaxWidth()) {
             TextField(
                 value = name,
@@ -74,8 +146,11 @@ fun PersonListObject() {
             TextField(
                 value = age,
                 placeholder = { Text(text = "Ingrese la edad") },
-                onValueChange = { text -> age = text }
+                onValueChange = { text -> age = text },
+                //keyboardOptions = KeyboardType.Number
+
             )
+
             Spacer(modifier = Modifier.size(16.dp))
 
             Button(
